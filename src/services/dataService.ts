@@ -8,9 +8,12 @@ export async function generateScoutingReport(prospect: Prospect): Promise<Scouti
     
     Return the response strictly as a JSON object with these exact keys:
     "report": "A 2-sentence professional scouting summary"
+    Return the response strictly as a JSON object:
+  {
+    "report": "A 2-sentence professional scouting summary",
     "xFactor": "A 3-5 word specific elite trait"
-    
-    Do not include markdown formatting or backticks.`;
+  }
+  Do not include markdown or backticks.`;
 
     try {
       const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
