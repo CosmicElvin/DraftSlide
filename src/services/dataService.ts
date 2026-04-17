@@ -2,8 +2,7 @@ import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-
+apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
 export interface ScoutingData {
   report: string;
   xFactor: string;
