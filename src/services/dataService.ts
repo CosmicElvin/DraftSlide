@@ -2,9 +2,7 @@ import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY);  xFactor: string;
-}
-
+const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY);
 export async function generateScoutingReport(prospect: Prospect): Promise<ScoutingData> {
   const prompt = `Act as an expert NBA scout. Provide a brief scouting report and identify an X-factor for ${prospect.name}, a ${prospect.position} from ${prospect.school}. 
     
