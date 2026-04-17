@@ -537,7 +537,7 @@ export function BigBoard({
             ) : (
               <>
                 <h1 
-                  className={`text-5xl md:text-7xl font-display tracking-[-0.05em] uppercase leading-[0.85] ${activeBoardId !== 'default' ? 'cursor-pointer hover:text-accent-green' : ''} transition-colors`}
+                  className={`text-3xl md:text-7xl font-display tracking-[-0.05em] uppercase leading-[0.85] ${activeBoardId !== 'default' ? 'cursor-pointer hover:text-accent-green' : ''} transition-colors`}
                   onClick={() => {
                     if (activeBoardId === 'default') return;
                     const board = boards.find(b => b.id === activeBoardId);

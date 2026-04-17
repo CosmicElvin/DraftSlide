@@ -1,7 +1,5 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { Prospect } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 export interface ScoutingData {
   report: string;
   xFactor: string;
@@ -28,33 +26,19 @@ export async function generateScoutingReport(prospect: Prospect): Promise<Scouti
       Off-Ball Defense: ${prospect.attributes.offBallDefense}
     
     The tone should be professional, evaluative, and slightly personalized as "Clyde".
+    Respond with JSON containing 'report' and 'xFactor'.
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        temperature: 0.7,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            report: { 
-              type: Type.STRING,
-              description: "A 2-3 sentence professional scouting report."
-            },
-            xFactor: { 
-              type: Type.STRING,
-              description: "A 1-3 word catchy X-Factor description."
-            }
-          },
-          required: ["report", "xFactor"]
-        }
-      },
+    const response = await fetch('/api/generate-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
     });
-
-    return JSON.parse(response.text.trim());
+    
+    if (!response.ok) throw new Error("API call failed");
+    
+    return await response.json();
   } catch (error) {
     console.error("Error generating scouting report:", error);
     return {
@@ -85,31 +69,22 @@ export async function generateSleeperPick(candidates: Prospect[]): Promise<Sleep
     3. A defense of your pick (2-3 sentences) explaining why they are a sleeper and why their unique skill makes them a great pick.
     
     The tone should be professional and insightful.
+    Respond with JSON containing 'prospectId', 'report', and 'defense'.
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        temperature: 0.8,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            prospectId: { type: Type.STRING },
-            report: { type: Type.STRING },
-            defense: { type: Type.STRING }
-          },
-          required: ["prospectId", "report", "defense"]
-        }
-      },
+    const response = await fetch('/api/generate-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
     });
-
-    return JSON.parse(response.text.trim());
+    
+    if (!response.ok) throw new Error("API call failed");
+    
+    return await response.json();
   } catch (error) {
     console.error("Error generating sleeper pick:", error);
-    // Fallback to random candidate if AI fails
+    // Fallback to random candidate
     const fallback = candidates[Math.floor(Math.random() * candidates.length)];
     return {
       prospectId: fallback.id,

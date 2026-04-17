@@ -52,6 +52,14 @@ export function ProspectCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [clydeData, setClydeData] = useState<ScoutingData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isExpanded && !clydeData && !isGenerating) {
@@ -129,78 +137,95 @@ export function ProspectCard({
         }}
       >
         {/* Row View */}
-        <div className="flex items-center p-4 gap-4 md:gap-6">
-          <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center p-2 gap-2 md:gap-4 flex-nowrap">
+          <div className="flex flex-col items-center gap-0.5 shrink-0">
             <div 
               {...attributes} 
               {...listeners}
-              className={`p-2 rounded-lg transition-colors ${disabled ? 'cursor-default opacity-50' : 'cursor-grab active:cursor-grabbing hover:bg-white/5'}`}
+              className={`p-1 rounded transition-colors ${disabled ? 'cursor-default opacity-50' : 'cursor-grab active:cursor-grabbing hover:bg-white/5'}`}
               onClick={(e) => e.stopPropagation()}
             >
               {disabled ? (
-                <Lock className="w-5 h-5 text-muted-foreground" />
+                <Lock className="w-4 h-4 text-muted-foreground" />
               ) : (
-                <GripVertical className="w-5 h-5 text-muted-foreground" />
+                <GripVertical className="w-4 h-4 text-muted-foreground" />
               )}
             </div>
             {showArrows && !disabled && (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-0.5">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onMoveUp?.();
                   }}
-                  className="p-1 hover:bg-white/10 rounded text-muted-foreground hover:text-accent-green transition-colors"
+                  className="p-0.5 hover:bg-white/10 rounded text-muted-foreground hover:text-accent-green transition-colors"
                 >
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-3 h-3" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onMoveDown?.();
                   }}
-                  className="p-1 hover:bg-white/10 rounded text-muted-foreground hover:text-accent-green transition-colors"
+                  className="p-0.5 hover:bg-white/10 rounded text-muted-foreground hover:text-accent-green transition-colors"
                 >
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-3 h-3" />
                 </button>
               </div>
             )}
           </div>
 
-          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center font-display text-3xl text-muted-foreground/50 group-hover:text-primary transition-colors">
+          <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-display text-xl text-muted-foreground/50 group-hover:text-primary transition-colors">
             {rank}
           </div>
 
-          <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white p-2 border border-border shadow-inner flex items-center justify-center overflow-hidden">
+          {/* Desktop Logo (Next to Name) */}
+          <div className="hidden md:flex flex-shrink-0 w-10 h-10 rounded-xl bg-white p-1 border border-border shadow-inner items-center justify-center overflow-hidden">
             {prospect.logo === 'WORLD_ICON' ? (
-              <Globe className="w-8 h-8 text-[#333333]" />
+              <Globe className="w-6 h-6 text-[#333333]" />
             ) : (
               <img 
                 src={prospect.logo} 
                 alt={prospect.school} 
                 className="max-w-full max-h-full object-contain"
                 referrerPolicy="no-referrer"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(prospect.school)}&background=333&color=fff&size=128&bold=true`;
-                }}
               />
             )}
           </div>
 
-          <div className="flex-grow min-w-0">
-            <div className="flex flex-col">
-              <h3 className="font-display text-2xl md:text-3xl uppercase leading-none mb-1">{prospect.name}</h3>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                <span>{prospect.position}</span>
-                <span className="w-1 h-1 bg-border rounded-full" />
-                <span>{prospect.height}</span>
-                <span className="w-1 h-1 bg-border rounded-full" />
-                <span>{prospect.weight}</span>
-                <span className="w-1 h-1 bg-border rounded-full" />
-                <span className="text-primary/80">Age {prospect.age.toFixed(1)}</span>
-              </div>
-            </div>
+          {/* Mobile Consensus Rank (Top Right) */}
+          <div className="absolute top-1 right-2 md:hidden">
+            <span className="text-[8px] font-black text-muted-foreground mr-0.5">CON</span>
+            <span className="text-[10px] font-display text-primary">#{prospect.consensusRank}</span>
+          </div>
+
+          <div className="flex-grow min-w-0 pr-10">
+             <div className="flex flex-col items-start gap-1">
+               {/* Mobile Only: Single School Logo Above Name */}
+               <div className="md:hidden w-8 h-8 rounded-xl bg-white p-1 border border-border shadow-inner flex items-center justify-center overflow-hidden shrink-0">
+                 {prospect.logo === 'WORLD_ICON' ? (
+                   <Globe className="w-5 h-5 text-[#333333]" />
+                 ) : (
+                   <img 
+                     src={prospect.logo} 
+                     alt={prospect.school} 
+                     className="max-w-full max-h-full object-contain"
+                     referrerPolicy="no-referrer"
+                   />
+                 )}
+               </div>
+               
+               <h3 className="font-display text-sm md:text-2xl uppercase leading-none mt-1 truncate">{prospect.name}</h3>
+               <div className="flex flex-wrap items-center gap-x-2 gap-y-0 text-[8px] md:text-[8px] text-muted-foreground font-bold uppercase tracking-widest leading-tight">
+                 <span>{prospect.position}</span>
+                 <span className="w-0.5 h-0.5 bg-border rounded-full" />
+                 <span>{prospect.height}</span>
+                 <span className="w-0.5 h-0.5 bg-border rounded-full" />
+                 <span>{prospect.weight}</span>
+                 <span className="w-0.5 h-0.5 bg-border rounded-full" />
+                 <span>Age {prospect.age.toFixed(1)}</span>
+               </div>
+             </div>
           </div>
 
           {/* Top Strength & Weakness Icons */}
@@ -219,8 +244,9 @@ export function ProspectCard({
             </div>
           </div>
 
+          {/* Desktop Consensus Rank */}
           <div 
-            className="flex flex-col items-center justify-center min-w-[100px] hover:bg-primary/10 rounded-lg transition-colors p-2"
+            className="hidden md:flex flex-col items-center justify-center min-w-[100px] hover:bg-primary/10 rounded-lg transition-colors p-2"
             onClick={(e) => {
               e.stopPropagation();
               onSwitchToConsensus?.();
@@ -257,9 +283,9 @@ export function ProspectCard({
                 {/* Left: Radar Chart */}
                 <div className="lg:col-span-4 flex flex-col items-center">
                   <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-6 self-start">Attribute Web</h4>
-                  <div className="w-full h-[280px]">
+                  <div className="w-full h-[220px] md:h-[280px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                      <RadarChart cx="50%" cy="50%" outerRadius={isMobile ? "70%" : "80%"} data={radarData}>
                         <PolarGrid 
                           stroke="rgba(255,255,255,0.15)" 
                           gridType="polygon" 
@@ -267,13 +293,13 @@ export function ProspectCard({
                         />
                         <PolarAngleAxis 
                           dataKey="subject" 
-                          tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 900, letterSpacing: '0.05em' }} 
+                          tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: isMobile ? 7 : 9, fontWeight: 900, letterSpacing: '0.05em' }} 
                         />
                         <PolarRadiusAxis 
                           angle={90} 
                           domain={[0, 5]} 
                           tickCount={6}
-                          tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 8 }}
+                          tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: isMobile ? 6 : 8 }}
                           axisLine={false} 
                         />
                         <Radar
@@ -293,7 +319,7 @@ export function ProspectCard({
                   <div>
                     <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-4">College Production</h4>
                     <div className="grid grid-cols-4 gap-3">
-                      {[
+                       {[
                         { label: 'PPG', val: prospect.stats.pts },
                         { label: 'APG', val: prospect.stats.ast },
                         { label: 'REB', val: prospect.stats.reb },
@@ -308,9 +334,9 @@ export function ProspectCard({
                         { label: 'TOV', val: prospect.stats.tov },
                         { label: 'FT%', val: prospect.stats.ft },
                       ].map(s => (
-                        <div key={s.label} className="bg-white/5 p-2 border border-white/5 rounded-lg text-center">
-                          <div className="text-[8px] font-bold text-muted-foreground uppercase mb-0.5">{s.label}</div>
-                          <div className="text-sm font-display">{s.val}</div>
+                        <div key={s.label} className="bg-white/5 p-1.5 md:p-2 border border-white/5 rounded-lg text-center">
+                          <div className="text-[6px] md:text-[8px] font-bold text-muted-foreground uppercase mb-0.5">{s.label}</div>
+                          <div className="text-xs md:text-sm font-display">{s.val}</div>
                         </div>
                       ))}
                     </div>

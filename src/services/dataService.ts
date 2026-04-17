@@ -1,5 +1,36 @@
 import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
+import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+
+export interface ScoutingData {
+  report: string;
+  xFactor: string;
+}
+
+export async function generateScoutingReport(prospect: Prospect): Promise<ScoutingData> {
+  const prompt = `Act as an expert NBA scout. Provide a brief, professional scouting report (max 3 sentences) for ${prospect.name}, a ${prospect.position} from ${prospect.school}. Also, identify their "X-Factor" (one core skill or trait that defines their ceiling) in a short phrase. Output as JSON with keys 'report' and 'xFactor'.`;
+
+  try {
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Attempt to parse JSON from response
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    const jsonString = text.substring(jsonStart, jsonEnd);
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('Error generating scouting report:', error);
+    return {
+      report: 'Analysis currently unavailable.',
+      xFactor: 'Pending Analysis'
+    };
+  }
+}
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzT5gr4E4bZKV_JDp6f4ueVkQa8i4rGoDsxY9Vo811L2XRM4oSvR3733a5VybGuVYuIWl8MCFjNoLk/pub?gid=0&output=csv';
 

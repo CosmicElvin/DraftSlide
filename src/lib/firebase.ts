@@ -1,22 +1,15 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, orderBy, addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCZlEn4_7uwPqnwr53H8J8hHIAyw7hxjxY",
-  authDomain: "draftslide.firebaseapp.com",
-  projectId: "draftslide",
-  storageBucket: "draftslide.firebasestorage.app",
-  messagingSenderId: "802991323978",
-  appId: "1:802991323978:web:006468d96210d8be3fdfb3",
-  measurementId: "G-C2HRXEW5L6"
-};
+const firebaseConfig = { apiKey: 'AIzaSyCZlEn4_7uwPqnwr53H8J8hHIAyw7hxjxY', authDomain: 'draftslide.firebaseapp.com', projectId: 'draftslide', storageBucket: 'draftslide.firebasestorage.app', messagingSenderId: '802991323978', appId: '1:802991323978:web:006468d96210d8be3fdfb3', measurementId: 'G-C2HRXEW5L6' };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getFirestore(app); // Changed to db = getFirestore(app) as projectId is in config
 export const googleProvider = new GoogleAuthProvider();
+
 // Auth Helpers
 export const signInWithGoogle = async () => {
   try {

@@ -43,29 +43,29 @@ export function LandingPage({ onNavigate }: { onNavigate: (tab: 'rankings' | 'fr
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         <button 
           onClick={() => onNavigate('rankings')}
-          className="group p-6 bg-card border border-border hover:border-accent-green transition-all text-left flex flex-col items-center text-center"
+          className="group p-6 bg-card border border-border hover:border-accent-green transition-all text-center flex flex-col items-center justify-center"
         >
           <Trophy className="w-6 h-6 text-accent-green mb-3 group-hover:scale-110 transition-transform" />
           <h3 className="text-xs font-display uppercase mb-1">Analyze</h3>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Prospect data & AI insights.</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest text-center">Prospect data & AI insights.</p>
         </button>
 
         <button 
           onClick={() => onNavigate('my-boards')}
-          className="group p-6 bg-card border border-border hover:border-accent-green transition-all text-left flex flex-col items-center text-center"
+          className="group p-6 bg-card border border-border hover:border-accent-green transition-all text-center flex flex-col items-center justify-center"
         >
           <Briefcase className="w-6 h-6 text-accent-green mb-3 group-hover:scale-110 transition-transform" />
           <h3 className="text-xs font-display uppercase mb-1">Manage</h3>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Custom draft boards & notes.</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest text-center">Custom draft boards & notes.</p>
         </button>
 
         <button 
           onClick={() => onNavigate('friends')}
-          className="group p-6 bg-card border border-border hover:border-accent-green transition-all text-left flex flex-col items-center text-center"
+          className="group p-6 bg-card border border-border hover:border-accent-green transition-all text-center flex flex-col items-center justify-center"
         >
           <Users className="w-6 h-6 text-accent-green mb-3 group-hover:scale-110 transition-transform" />
           <h3 className="text-xs font-display uppercase mb-1">Share</h3>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Collaborate with friends.</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest text-center">Collaborate with friends.</p>
         </button>
       </div>
     </div>
