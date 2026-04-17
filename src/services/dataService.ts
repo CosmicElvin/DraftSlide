@@ -2,8 +2,7 @@ import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY);  report: string;
-  xFactor: string;
+const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY);  xFactor: string;
 }
 
 export async function generateScoutingReport(prospect: Prospect): Promise<ScoutingData> {
