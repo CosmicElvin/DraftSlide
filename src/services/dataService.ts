@@ -16,8 +16,7 @@ export async function generateScoutingReport(prospect: Prospect): Promise<Scouti
       const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text().replace(/```json|```/gi, '').trim();
-      
+const text = response.text().replace(/```json|```/gi, '').trim();      
       return JSON.parse(text);
   } catch (error) {
     console.error('Error generating scouting report:', error);
