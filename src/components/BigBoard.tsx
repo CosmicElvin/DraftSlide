@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Prospect } from '../types';
 import { ProspectCard } from './ProspectCard';
+import { AddProspectRow } from './AddProspectRow';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, RotateCcw, Plus, Save, Loader2, Share2, Download, MoreHorizontal, Pencil, Brain, History, Filter, Sparkles, Search, ChevronDown } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -196,6 +197,47 @@ export function BigBoard({
     }
   }, [activeBoardId, boards, initialProspects, ncaaTeams, viewingFriendBoard, friendBoardData]);
 
+  const handleAddCustomProspect = (data: any) => {
+    const newProspect: Prospect = {
+      id: `custom_${Date.now()}`,
+      name: data.name,
+      school: 'Custom',
+      logo: 'WORLD_ICON',
+      height: data.height,
+      weight: data.weight,
+      age: parseFloat(data.age) || 0,
+      sizeScore: 50,
+      position: data.position,
+      strengths: [],
+      weaknesses: [],
+      xFactor: 'Custom',
+      consensusRank: 999, // Custom
+      rankings: [],
+      description: data.notes || '',
+      stats: {
+        gp: 0, min: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0,
+        fg: '0%', fga: 0, threeP: '0%', threePA: 0, ft: '0%'
+      },
+      attributes: {
+        athleticism: parseInt(data.attributes) || 3,
+        shooting: parseInt(data.attributes) || 3,
+        creation: parseInt(data.attributes) || 3,
+        onBallDefense: parseInt(data.attributes) || 3,
+        offBallDefense: parseInt(data.attributes) || 3
+      }
+    };
+    setProspects(prev => [...prev, newProspect]);
+  };
+
+  const prospectList = [...prospects];
+  if (activeBoardId !== 'default' && !viewingFriendBoard) {
+    if (prospectList.length >= 60) {
+      prospectList.splice(59, 0, { id: 'ADD_PROSPECT_ROW' } as any);
+    } else {
+      prospectList.push({ id: 'ADD_PROSPECT_ROW' } as any);
+    }
+  }
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -210,7 +252,7 @@ export function BigBoard({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
+    if (over && active.id !== over.id && active.id !== 'ADD_PROSPECT_ROW' && over.id !== 'ADD_PROSPECT_ROW') {
       setProspects((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
@@ -766,33 +808,38 @@ export function BigBoard({
             >
               <div className="space-y-3">
                 <AnimatePresence mode="popLayout">
-                  {prospects.map((prospect, index) => (
-                    <motion.div
-                      key={prospect.id}
-                      id={`prospect-${prospect.id}`}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ duration: 0.2, delay: index * 0.02 }}
-                    >
-                      <ProspectCard
-                        prospect={prospect}
-                        rank={index + 1}
-                        onClick={handleProspectClick}
-                        onSwitchToConsensus={() => onActiveBoardChange?.('default')}
-                        onMoveUp={() => moveProspect(index, 'up')}
-                        onMoveDown={() => moveProspect(index, 'down')}
-                        isActive={selectedProspect?.id === prospect.id}
-                        disabled={activeBoardId === 'default' || !!viewingFriendBoard}
-                        showArrows={activeBoardId !== 'default' && !viewingFriendBoard}
-                        notes={viewingFriendBoard ? (friendBoardData?.notes?.[prospect.id] || '') : (activeNotes[prospect.id] || '')}
-                        onNotesChange={(val) => handleNotesChange(prospect.id, val)}
-                        isCustomBoard={activeBoardId !== 'default' || !!viewingFriendBoard}
-                        highlighted={isHighlighted(prospect)}
-                      />
-                    </motion.div>
-                  ))}
+                  {prospectList.map((prospect, index) => {
+                    if (prospect.id === 'ADD_PROSPECT_ROW') {
+                      return <AddProspectRow key="add-row" onAdd={handleAddCustomProspect} />;
+                    }
+                    return (
+                      <motion.div
+                        key={prospect.id}
+                        id={`prospect-${prospect.id}`}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.2, delay: index * 0.02 }}
+                      >
+                        <ProspectCard
+                          prospect={prospect}
+                          rank={index + 1}
+                          onClick={handleProspectClick}
+                          onSwitchToConsensus={() => onActiveBoardChange?.('default')}
+                          onMoveUp={() => moveProspect(index, 'up')}
+                          onMoveDown={() => moveProspect(index, 'down')}
+                          isActive={selectedProspect?.id === prospect.id}
+                          disabled={activeBoardId === 'default' || !!viewingFriendBoard}
+                          showArrows={activeBoardId !== 'default' && !viewingFriendBoard}
+                          notes={viewingFriendBoard ? (friendBoardData?.notes?.[prospect.id] || '') : (activeNotes[prospect.id] || '')}
+                          onNotesChange={(val) => handleNotesChange(prospect.id, val)}
+                          isCustomBoard={activeBoardId !== 'default' || !!viewingFriendBoard}
+                          highlighted={isHighlighted(prospect)}
+                        />
+                      </motion.div>
+                    );
+                  })}
                 </AnimatePresence>
               </div>
             </SortableContext>

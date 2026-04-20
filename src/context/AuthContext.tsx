@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../lib/firebase';
+import { auth, db, loginWithEmail, registerWithEmail, logout, signInWithGoogle } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 interface AuthContextType {
@@ -8,13 +8,21 @@ interface AuthContextType {
   username: string | null;
   loading: boolean;
   refreshUsername: () => Promise<void>;
+  loginWithEmail: typeof loginWithEmail;
+  registerWithEmail: typeof registerWithEmail;
+  logout: typeof logout;
+  signInWithGoogle: typeof signInWithGoogle;
 }
 
 const AuthContext = createContext<AuthContextType>({ 
   user: null, 
   username: null, 
   loading: true,
-  refreshUsername: async () => {} 
+  refreshUsername: async () => {},
+  loginWithEmail: async () => {},
+  registerWithEmail: async () => {},
+  logout: () => {},
+  signInWithGoogle: async () => {} 
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -50,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, username, loading, refreshUsername }}>
+    <AuthContext.Provider value={{ user, username, loading, refreshUsername, loginWithEmail, registerWithEmail, logout, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

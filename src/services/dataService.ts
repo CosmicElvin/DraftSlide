@@ -2,19 +2,8 @@ import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 
-let aiClient: GoogleGenAI | null = null;
-
-function getAiClient(): GoogleGenAI {
-  if (!aiClient) {
-    // @ts-ignore
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('VITE_GEMINI_API_KEY environment variable is missing.');
-    }
-    aiClient = new GoogleGenAI({ apiKey });
-  }
-  return aiClient;
-}
+// @ts-ignore
+const ai = new GoogleGenAI({ apiKey: 'AIzaSyClew8Xls0uynzdhuXQpC1p9rafqrRIw4c' });
 
 export interface ScoutingData {
   report: string;
@@ -25,7 +14,6 @@ export async function generateScoutingReport(prospect: Prospect): Promise<Scouti
   const prompt = `Act as an expert NBA scout. Provide a brief, professional scouting report (max 3 sentences) for ${prospect.name}, a ${prospect.position} from ${prospect.school}. Also, identify their "X-Factor" (one core skill or trait that defines their ceiling) in a short phrase. Output as JSON with keys 'report' and 'xFactor'.`;
 
   try {
-    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,

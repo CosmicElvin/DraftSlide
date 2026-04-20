@@ -1,4 +1,8 @@
 import { Prospect } from "../types";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
+
+// @ts-ignore
+const ai = new GoogleGenAI({ apiKey: 'AIzaSyClew8Xls0uynzdhuXQpC1p9rafqrRIw4c' });
 
 export interface ScoutingData {
   report: string;
@@ -30,15 +34,24 @@ export async function generateScoutingReport(prospect: Prospect): Promise<Scouti
   `;
 
   try {
-    const response = await fetch('/api/generate-report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        safetySettings: [
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        ],
+      },
     });
     
-    if (!response.ok) throw new Error("API call failed");
-    
-    return await response.json();
+    const text = response.text || '';
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    const jsonString = text.substring(jsonStart, jsonEnd);
+    return JSON.parse(jsonString);
   } catch (error) {
     console.error("Error generating scouting report:", error);
     return {
@@ -73,15 +86,24 @@ export async function generateSleeperPick(candidates: Prospect[]): Promise<Sleep
   `;
 
   try {
-    const response = await fetch('/api/generate-report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        safetySettings: [
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        ],
+      },
     });
     
-    if (!response.ok) throw new Error("API call failed");
-    
-    return await response.json();
+    const text = response.text || '';
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    const jsonString = text.substring(jsonStart, jsonEnd);
+    return JSON.parse(jsonString);
   } catch (error) {
     console.error("Error generating sleeper pick:", error);
     // Fallback to random candidate

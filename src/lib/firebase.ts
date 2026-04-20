@@ -1,5 +1,12 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
+} from 'firebase/auth';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const firebaseConfig = { apiKey: 'AIzaSyCZlEn4_7uwPqnwr53H8J8hHIAyw7hxjxY', authDomain: 'draftslide.firebaseapp.com', projectId: 'draftslide', storageBucket: 'draftslide.firebasestorage.app', messagingSenderId: '802991323978', appId: '1:802991323978:web:006468d96210d8be3fdfb3', measurementId: 'G-C2HRXEW5L6' };
@@ -7,7 +14,7 @@ const firebaseConfig = { apiKey: 'AIzaSyCZlEn4_7uwPqnwr53H8J8hHIAyw7hxjxY', auth
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app); // Changed to db = getFirestore(app) as projectId is in config
+export const db = getFirestore(app); 
 export const googleProvider = new GoogleAuthProvider();
 
 // Auth Helpers
@@ -30,6 +37,22 @@ export const signInWithGoogle = async () => {
     console.error('Error signing in with Google:', error);
     throw error;
   }
+};
+
+export const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
+export const registerWithEmail = async (email, password, displayName) => {
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  const user = result.user;
+
+  await setDoc(doc(db, 'users', user.uid), {
+    uid: user.uid,
+    email: user.email,
+    displayName: displayName,
+    photoURL: null,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  return user;
 };
 
 export const logout = () => signOut(auth);
