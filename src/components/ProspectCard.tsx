@@ -50,10 +50,8 @@ export function ProspectCard({
   highlighted = false
 }: ProspectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [clydeData, setClydeData] = useState<ScoutingData | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
+  
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -61,18 +59,6 @@ export function ProspectCard({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    if (isExpanded && !clydeData && !isGenerating) {
-      const getReport = async () => {
-        setIsGenerating(true);
-        const data = await generateScoutingReport(prospect);
-        setClydeData(data);
-        setIsGenerating(false);
-      };
-      getReport();
-    }
-  }, [isExpanded, prospect.id, clydeData, isGenerating, prospect]);
-  
   const {
     attributes,
     listeners,
@@ -346,13 +332,9 @@ export function ProspectCard({
                     <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-4 flex items-center gap-2">
                       The X-Factor
                     </h4>
-                    {isGenerating ? (
-                      <div className="h-6 w-32 bg-white/5 animate-pulse rounded-md" />
-                    ) : (
-                      <p className="text-sm font-bold leading-relaxed text-foreground italic border-l-2 border-primary pl-4">
-                        "{clydeData?.xFactor || prospect.xFactor}"
+                    <p className="text-sm font-bold leading-relaxed text-foreground italic border-l-2 border-primary pl-4">
+                        "{prospect.xFactor}"
                       </p>
-                    )}
                   </div>
 
                   <div>
@@ -374,16 +356,9 @@ export function ProspectCard({
                         </div>
                       </div>
                     </div>
-                    {isGenerating ? (
-                      <div className="flex items-center gap-2 text-muted-foreground animate-pulse py-2">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Clyde is analyzing tape...</span>
-                      </div>
-                    ) : (
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        {clydeData?.report || prospect.description}
+                        {prospect.description}
                       </p>
-                    )}
                   </div>
                 </div>
 
