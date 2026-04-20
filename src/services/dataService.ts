@@ -1,45 +1,9 @@
 import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
-import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
-
-// @ts-ignore
-const ai = new GoogleGenAI({ apiKey: 'AIzaSyClew8Xls0uynzdhuXQpC1p9rafqrRIw4c' });
 
 export interface ScoutingData {
   report: string;
   xFactor: string;
-}
-
-export async function generateScoutingReport(prospect: Prospect): Promise<ScoutingData> {
-  const prompt = `Act as an expert NBA scout. Provide a brief, professional scouting report (max 3 sentences) for ${prospect.name}, a ${prospect.position} from ${prospect.school}. Also, identify their "X-Factor" (one core skill or trait that defines their ceiling) in a short phrase. Output as JSON with keys 'report' and 'xFactor'.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: {
-        safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-        ],
-      },
-    });
-    const text = response.text || '';
-    
-    // Attempt to parse JSON from response
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}') + 1;
-    const jsonString = text.substring(jsonStart, jsonEnd);
-    return JSON.parse(jsonString);
-  } catch (error) {
-    console.error('Error generating scouting report:', error);
-    return {
-      report: 'Analysis currently unavailable.',
-      xFactor: 'Pending Analysis'
-    };
-  }
 }
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzT5gr4E4bZKV_JDp6f4ueVkQa8i4rGoDsxY9Vo811L2XRM4oSvR3733a5VybGuVYuIWl8MCFjNoLk/pub?gid=0&output=csv';
@@ -74,6 +38,8 @@ interface UnifiedRow {
   'STL': string;
   'BLK': string;
   'TOV': string;
+  'Snapshot': string;
+  'X-Factor': string;
 }
 
 export async function fetchProspectData(): Promise<Prospect[]> {
@@ -93,7 +59,6 @@ export async function fetchProspectData(): Promise<Prospect[]> {
       const name = row['NAME'] || 'Unknown Player';
       const conRank = parseInt(row['CON RANK']) || (index + 1);
 
-      // We only keep the Consensus ranking as requested
       const rankings: Ranking[] = [
         { site: 'Consensus', rank: conRank }
       ];
@@ -106,14 +71,14 @@ export async function fetchProspectData(): Promise<Prospect[]> {
         height: row['HEIGHT'] || "0'0\"",
         weight: row['WEIGHT'] || '0',
         age: parseFloat(row['AGE']) || 0,
-        sizeScore: 85, // Default or calculated if we had more info
+        sizeScore: 85,
         position: row['POSITION'] || 'N/A',
-        strengths: [], // Clyde will infer or we can leave empty
+        strengths: [],
         weaknesses: [],
-        xFactor: 'Pending AI Analysis', // Clyde will replace this
+        xFactor: row['X-Factor'] || 'Pending Analysis',
         consensusRank: conRank,
         rankings: rankings,
-        description: `${name} is a top prospect from ${row['COLLEGE/TEAM']}.`,
+        description: row['Snapshot'] || `${name} is a top prospect from ${row['COLLEGE/TEAM']}.`,
         stats: {
           gp: parseInt(row['GP']) || 0,
           min: parseFloat(row['MPG']) || 0,
