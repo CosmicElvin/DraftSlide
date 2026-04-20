@@ -2,25 +2,40 @@ import Papa from 'papaparse';
 import { Prospect, Ranking } from '../types';
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY);
-export async function generateScoutingReport(prospect: Prospect): Promise<ScoutingData> {
-  const prompt = `Act as an expert NBA scout. Provide a brief scouting report and identify an X-factor for ${prospect.name}, a ${prospect.position} from ${prospect.school}. 
-    
-    Return the response strictly as a JSON object with these exact keys:
-    "report": "A 2-sentence professional scouting summary"
-    Return the response strictly as a JSON object:
-  {
-    "report": "A 2-sentence professional scouting summary",
-    "xFactor": "A 3-5 word specific elite trait"
-  }
-  Do not include markdown or backticks.`;
+let aiClient: GoogleGenAI | null = null;
 
-    try {
-      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-const text = response.text().replace(/```json|```/gi, '').trim();      
-      return JSON.parse(text);
+function getAiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('VITE_GEMINI_API_KEY environment variable is missing.');
+    }
+    aiClient = new GoogleGenAI({ apiKey });
+  }
+  return aiClient;
+}
+
+export interface ScoutingData {
+  report: string;
+  xFactor: string;
+}
+
+export async function generateScoutingReport(prospect: Prospect): Promise<ScoutingData> {
+  const prompt = `Act as an expert NBA scout. Provide a brief, professional scouting report (max 3 sentences) for ${prospect.name}, a ${prospect.position} from ${prospect.school}. Also, identify their "X-Factor" (one core skill or trait that defines their ceiling) in a short phrase. Output as JSON with keys 'report' and 'xFactor'.`;
+
+  try {
+    const ai = getAiClient();
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+    });
+    const text = response.text || '';
+    
+    // Attempt to parse JSON from response
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    const jsonString = text.substring(jsonStart, jsonEnd);
+    return JSON.parse(jsonString);
   } catch (error) {
     console.error('Error generating scouting report:', error);
     return {
